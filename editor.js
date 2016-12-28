@@ -7,7 +7,7 @@ var panel;
 var geoJsonInput;
 var downloadLink;
 
-var selectedFeature = null;
+var selectedDataFeature = null;
 var polygon = null;
 
 var snappingInProgess = false;
@@ -228,7 +228,7 @@ function snapPoint(path, index) {
   var snapped = false;
 
   map.data.forEach(function(feature) {
-  	if(feature !== selectedFeature) {
+  	if(feature !== selectedDataFeature) {
 	    var geometry = feature.getGeometry();
 	    
 	    geometry.forEachLatLng(function(latLng2) {
@@ -245,7 +245,7 @@ function snapPoint(path, index) {
 
   path.setAt(index, snappingPoint);
 
-  updateDataFeatureFromPolygon();
+  updateDataFeatureFromFeature();
 
   snappingInProgess = false;
 
@@ -284,9 +284,9 @@ function handleMapClick(e) {
 function selectFeature(e) {
   deselectLastFeature();
 
-  selectedFeature = e.feature;
+  selectedDataFeature = e.feature;
 
-  convertDataFeatureToPolygon();
+  convertDataFeatureToFeature();
 }
 
 function deselectLastFeature() {
@@ -296,68 +296,128 @@ function deselectLastFeature() {
   }
 }
 
-function updateDataFeatureFromPolygon() {
-  if(selectedFeature !== null && polygon !== null) {
-    var points = [];
-    polygon.getPaths().forEach(function(path) {
-      path.forEach(function(latLng) {
+function convertDataFeatureToFeature() {
+  var geometry = selectedDataFeature.getGeometry();
+  
+  polygon = null;
+
+  switch(geometry.getType()) {
+  	case 'Polygon':
+      var paths = [];
+      var linearRings = geometry.getArray();
+      linearRings.forEach(function(linearRing) {
+        var points = [];
+        linearRing.forEachLatLng(function(latLng) {
+          points.push(latLng);
+        });
+        paths.push(points);
+      });
+
+  	  polygon = new google.maps.Polygon({
+	    paths: paths,
+	    strokeColor: '#FF0000',
+	    strokeOpacity: 0.8,
+	    strokeWeight: 2,
+	    editable: true,
+	    fillColor: '#FF0000',
+	    fillOpacity: 0.35
+	  });
+	  polygon.getPaths().forEach(addPathListeners);
+	  break;
+
+	case 'LineString':
+      var points = [];
+      geometry.forEachLatLng(function(latLng) {
         points.push(latLng);
       });
-    });
 
-    selectedFeature.setGeometry(new google.maps.Data.Polygon([points]));
+  	  polygon = new google.maps.Polyline({
+	    path: points,
+	    strokeColor: '#FF0000',
+	    strokeOpacity: 0.8,
+	    strokeWeight: 2,
+	    editable: true
+	  });
+	  addPathListeners(polygon.getPath(), 0);
+	  break;
+
+  // case 'Point':
+  //     polygon = new google.maps.Marker({
+  //     position: geometry.get(),
+  //     strokeColor: '#FF0000',
+  //     strokeOpacity: 0.8,
+  //     strokeWeight: 2,
+  //     draggable: true
+  //   });
+  //   break;
+
+  }
+
+  if(polygon === null) {
+  	return;
+  } else {
+
+	  polygon.setMap(map);
+
+	  // google.maps.event.addListener(polygon, 'mousedown', function(e) {
+	  //     console.log("mousedown", e.latLng.toString(), e);
+
+	  //   // polygon.mouseMoveListener = google.maps.event.addListener(polygon, 'mousemove', handleMouseMove(path, e.vertex));
+
+	  // //   polygon.mouseMoveListener = map.addListener('drag', function(event) {
+	  //     // console.log("drag", event.latLng.toString());
+	  // //  });
+
+	  // });
+
+	  // google.maps.event.addListener(polygon, 'mouseup', function(e) {
+	  //     console.log("mouseup", e.latLng.toString());
+
+	  //     // google.maps.event.removeListener(polygon.mouseMoveListener);
+	  //     // map.removeListener(polygon.mouseMoveListener);
+	  // });
+
+	  google.maps.event.addListener(polygon, 'rightclick', function(e) {
+	    console.log(e);
+
+	    if(e.path !== undefined && e.vertex !== undefined) {
+	      polygon.getPaths().getAt(e.path).removeAt(e.vertex);
+	    }
+
+	  });
+	}
+
+}
+
+function updateDataFeatureFromFeature() {
+  if(selectedDataFeature !== null && polygon !== null) {
+    switch(selectedDataFeature.getGeometry().getType()) {
+      case 'Polygon':
+        var paths = [];
+        polygon.getPaths().forEach(function(path) {
+          var points = [];
+          path.forEach(function(latLng) {
+            points.push(latLng);
+          });
+          paths.push(points);
+        });
+        selectedDataFeature.setGeometry(new google.maps.Data.Polygon(paths));
+        break;
+
+      case 'LineString':
+        var points = [];
+        polygon.getPath().forEach(function(latLng) {
+          points.push(latLng);
+        });
+        selectedDataFeature.setGeometry(new google.maps.Data.LineString(points));
+        break;
+    }
 
   }
 }
 
-function convertDataFeatureToPolygon() {
-  var geometry = selectedFeature.getGeometry();
-  var points = [];
-  geometry.forEachLatLng(function(latLng) {
-    points.push(latLng);
-  });
-
-  polygon = new google.maps.Polygon({
-    paths: points,
-    strokeColor: '#FF0000',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    editable: true,
-    fillColor: '#FF0000',
-    fillOpacity: 0.35
-  });
-  polygon.setMap(map);
-
-  // google.maps.event.addListener(polygon, 'mousedown', function(e) {
-  //     console.log("mousedown", e.latLng.toString(), e);
-
-  //   // polygon.mouseMoveListener = google.maps.event.addListener(polygon, 'mousemove', handleMouseMove(path, e.vertex));
-
-  // //   polygon.mouseMoveListener = map.addListener('drag', function(event) {
-  //     // console.log("drag", event.latLng.toString());
-  // //  });
-
-  // });
-
-  // google.maps.event.addListener(polygon, 'mouseup', function(e) {
-  //     console.log("mouseup", e.latLng.toString());
-
-  //     // google.maps.event.removeListener(polygon.mouseMoveListener);
-  //     // map.removeListener(polygon.mouseMoveListener);
-  // });
-
-  google.maps.event.addListener(polygon, 'rightclick', function(e) {
-    console.log(e);
-
-    if(e.path !== undefined && e.vertex !== undefined) {
-      polygon.getPaths().getAt(e.path).removeAt(e.vertex);
-    }
-
-  });
-
-  polygon.getPaths().forEach(function(path, index) {
-
-    google.maps.event.addListener(path, 'set_at', function(index, oldLatLng) {
+function addPathListeners(path, pathIndex) {
+	google.maps.event.addListener(path, 'set_at', function(index, oldLatLng) {
       // var newLatLng = path.getAt(index);
       // console.log("set_at", index);
       if(!snappingInProgess) {
@@ -375,11 +435,8 @@ function convertDataFeatureToPolygon() {
     });
 
     google.maps.event.addListener(path, 'remove_at', function(index) {
-      updateDataFeatureFromPolygon();
+      updateDataFeatureFromFeature();
     });
-
-  });
-
 }
 
 // Display the validity of geoJson.
