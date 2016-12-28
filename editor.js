@@ -12,7 +12,9 @@ var polygon = null;
 
 var snappingInProgess = false;
 
-var zoomRatios = {
+var settings = {};
+settings.snapDistance = 25;
+settings.zoomRatios = {
   20: 1128.497220,
   19: 2256.994440,
   18: 4513.988880,
@@ -35,6 +37,54 @@ var zoomRatios = {
   1: 591657550.500000
 };
 
+function CustomControl(controlDiv, settings) {
+
+  // Set CSS for the control border.
+  var controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = '#fff';
+  controlUI.style.border = '2px solid #fff';
+  controlUI.style.borderRadius = '2px';
+  controlUI.style.boxShadow = '0 1px 4px -1px rgba(0,0,0,.3)';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.marginBottom = '22px';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Click to recenter the map';
+  controlDiv.appendChild(controlUI);
+
+  // Set CSS for the control interior.
+  var snapDistanceInput = document.createElement('input');
+  snapDistanceInput.setAttribute('id', 'snap-distance');
+  snapDistanceInput.setAttribute('type', 'number');
+  snapDistanceInput.setAttribute('min', 0);
+  snapDistanceInput.setAttribute('max', 100);
+  snapDistanceInput.setAttribute('value', settings.snapDistance);
+  snapDistanceInput.style.color = 'rgb(25,25,25)';
+  snapDistanceInput.style.fontFamily = 'Roboto,Arial,sans-serif';
+  snapDistanceInput.style.fontSize = '12px';
+  snapDistanceInput.style.lineHeight = '12px';
+  snapDistanceInput.style.paddingLeft = '5px';
+  snapDistanceInput.style.paddingRight = '5px';
+  controlUI.appendChild(snapDistanceInput);
+
+  var label = document.createElement('label');
+  label.setAttribute('for', 'snap-distance');
+  label.style.color = 'rgb(25,25,25)';
+  label.style.fontFamily = 'Roboto,Arial,sans-serif';
+  label.style.fontSize = '12px';
+  label.style.lineHeight = '20px';
+  label.style.paddingLeft = '5px';
+  label.style.paddingRight = '5px';
+  label.style.float = 'left';
+  label.innerHTML = 'Snap distance';
+  controlUI.appendChild(label);
+
+  snapDistanceInput.addEventListener('change', function(e) {
+    // console.log(e.target.value);
+    settings.snapDistance = e.target.value;
+  });
+
+}
+
 function init() {
   // Initialise the map.
   map = new google.maps.Map(document.getElementById('map-holder'), {
@@ -42,11 +92,20 @@ function init() {
     zoom: 3
   });
   map.data.setControls(['Point', 'LineString', 'Polygon']);
+  map.data.setControlPosition(google.maps.ControlPosition.TOP_RIGHT);
   map.data.setStyle({
     editable: false,
     draggable: false
   });
   map.addListener('click', handleMapClick);
+
+  var customControlDiv = document.createElement('div');
+  customControlDiv.style.marginTop = '5px';
+  customControlDiv.style.marginRight = '10px';
+  var customControl = new CustomControl(customControlDiv, settings);
+  customControlDiv.index = 0;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(customControlDiv);
+
   bindDataLayerListeners(map.data);
 
   // Retrieve HTML elements.
@@ -149,27 +208,33 @@ function refreshDataFromGeoJson() {
 // }
 
 function snapPoint(path, index) {
+  if(settings.snapDistance === 0) {
+    return false;
+  }
+
   snappingInProgess = true;
 
   var latLng = path.getAt(index);
   // console.log(latLng.toString());
 
-  var snapDistance = 0;
+  var maxDistance = 0;
   var zoom = map.getZoom();
-  if(zoomRatios[zoom] !== undefined) {
-    snapDistance = zoomRatios[zoom] / 100000000;
+  if(settings.zoomRatios[zoom] !== undefined) {
+    maxDistance = settings.zoomRatios[zoom] / 1000000000 * settings.snapDistance;
   }
 
   // snap point at index to all points of all other features:
   var snappingPoint = latLng;
+  var snapped = false;
 
   map.data.forEach(function(feature) {
   	if(feature !== selectedFeature) {
 	    var geometry = feature.getGeometry();
 	    
 	    geometry.forEachLatLng(function(latLng2) {
-	      if(latLng !== latLng2 && getDistance(latLng, latLng2) < snapDistance) {
+	      if(latLng !== latLng2 && getDistance(latLng, latLng2) < maxDistance) {
 	        snappingPoint = latLng2;
+          snapped = true;
 	      }
 	    });
 	}
@@ -181,6 +246,8 @@ function snapPoint(path, index) {
   updateDataFeatureFromPolygon();
 
   snappingInProgess = false;
+
+  return snapped;
 }
 
 // Refresh download link.
