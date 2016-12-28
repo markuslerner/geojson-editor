@@ -232,9 +232,11 @@ function snapPoint(path, index) {
 	    var geometry = feature.getGeometry();
 	    
 	    geometry.forEachLatLng(function(latLng2) {
-	      if(latLng !== latLng2 && getDistance(latLng, latLng2) < maxDistance) {
+        var distance = getDistance(latLng, latLng2);
+	      if(latLng !== latLng2 && distance < maxDistance) {
 	        snappingPoint = latLng2;
           snapped = true;
+          maxDistance = distance;
 	      }
 	    });
 	}
@@ -280,7 +282,6 @@ function handleMapClick(e) {
 }
 
 function selectFeature(e) {
-  // updateDataFeatureFromPolygon();
   deselectLastFeature();
 
   selectedFeature = e.feature;
