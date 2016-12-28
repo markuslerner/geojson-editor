@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+
+    <title>GeoJSON Editor</title>
+    <link href="styles.css" title="compact" rel="stylesheet" type="text/css">
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script src="editor.js"></script>
+  </head>
+
+  <body>
+    <div id="panel">
+      <div id="panel-content">
+        <div id="panel-title">GeoJSON Editor</div>
+        <hr/>
+        <div id="geojson-controls">
+          <button onclick="document.getElementById('geojson-input').select();">Select All</button>
+          <a id="download-link" href="data:;base64," download="geojson.json"><button>Download</button></a>
+        </div>
+        <textarea id="geojson-input"
+            placeholder="Drag and drop GeoJSON onto the map or paste it here to begin editing."></textarea>
+      </div>
+    </div>
+
+    <div id="map-container">
+      <div id="map-holder"></div>
+
+      <div id="drop-container">
+        <div id="drop-silhouette"></div>
+      </div>
+    </div>
+  </body>
+</html>
