@@ -154,19 +154,25 @@ function snapPoint(path, index) {
   var latLng = path.getAt(index);
   // console.log(latLng.toString());
 
-  var snapDistance = zoomRatios[map.getZoom()] / 100000000;
+  var snapDistance = 0;
+  var zoom = map.getZoom();
+  if(zoomRatios[zoom] !== undefined) {
+    snapDistance = zoomRatios[zoom] / 100000000;
+  }
 
   // snap point at index to all points of all other features:
   var snappingPoint = latLng;
 
   map.data.forEach(function(feature) {
-    var geometry = feature.getGeometry();
-    
-    geometry.forEachLatLng(function(latLng2) {
-      if(latLng !== latLng2 && getDistance(latLng, latLng2) < snapDistance) {
-        snappingPoint = latLng2;
-      }
-    });
+  	if(feature !== selectedFeature) {
+	    var geometry = feature.getGeometry();
+	    
+	    geometry.forEachLatLng(function(latLng2) {
+	      if(latLng !== latLng2 && getDistance(latLng, latLng2) < snapDistance) {
+	        snappingPoint = latLng2;
+	      }
+	    });
+	}
 
   });
 
@@ -233,7 +239,6 @@ function updateDataFeatureFromPolygon() {
 
     selectedFeature.setGeometry(new google.maps.Data.Polygon([points]));
 
-    // map.data.add(selectedFeature);
   }
 }
 
@@ -306,8 +311,6 @@ function convertDataFeatureToPolygon() {
     });
 
   });
-
-  // map.data.remove(selectedFeature);
 
 }
 
