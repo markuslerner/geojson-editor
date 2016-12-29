@@ -8,5 +8,6 @@ Snaps the dragged point to the points of all the other features.
 
 ## Usage
 
-– Click feature to edit points
-– Right-click point to delete point
+* Click feature to edit points
+* Right-click point to delete point
+* Set snapping distance in pixels
