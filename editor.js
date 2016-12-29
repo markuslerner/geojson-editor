@@ -207,7 +207,7 @@ function refreshDataFromGeoJson() {
 //   };
 // }
 
-function snapPoint(path, index) {
+function snapPointOnPath(path, index) {
   if(settings.snapDistance === 0) {
     return false;
   }
@@ -217,6 +217,19 @@ function snapPoint(path, index) {
   var latLng = path.getAt(index);
   // console.log(latLng.toString());
 
+  var snappedPoint = getSnappedPoint(latLng);
+
+  path.setAt(index, snappedPoint);
+
+  updateDataFeatureFromFeature();
+
+  snappingInProgess = false;
+
+  var snapped = snappedPoint !== latLng;
+  return snapped;
+}
+
+function getSnappedPoint(latLng) {
   var maxDistance = 0;
   var zoom = map.getZoom();
   if(settings.zoomRatios[zoom] !== undefined) {
@@ -224,32 +237,23 @@ function snapPoint(path, index) {
   }
 
   // snap point at index to all points of all other features:
-  var snappingPoint = latLng;
-  var snapped = false;
+  var snappedPoint = latLng;
 
   map.data.forEach(function(feature) {
-  	if(feature !== selectedDataFeature) {
-	    var geometry = feature.getGeometry();
-	    
-	    geometry.forEachLatLng(function(latLng2) {
+    if(feature !== selectedDataFeature) {
+      var geometry = feature.getGeometry();
+      
+      geometry.forEachLatLng(function(latLng2) {
         var distance = getDistance(latLng, latLng2);
-	      if(latLng !== latLng2 && distance < maxDistance) {
-	        snappingPoint = latLng2;
-          snapped = true;
+        if(distance < maxDistance) {
+          snappedPoint = latLng2;
           maxDistance = distance;
-	      }
-	    });
-	}
-
+        }
+      });
+    }
   });
 
-  path.setAt(index, snappingPoint);
-
-  updateDataFeatureFromFeature();
-
-  snappingInProgess = false;
-
-  return snapped;
+  return snappedPoint;
 }
 
 // Refresh download link.
@@ -341,15 +345,17 @@ function convertDataFeatureToFeature() {
 	  addPathListeners(polygon.getPath(), 0);
 	  break;
 
-  // case 'Point':
-  //     polygon = new google.maps.Marker({
-  //     position: geometry.get(),
-  //     strokeColor: '#FF0000',
-  //     strokeOpacity: 0.8,
-  //     strokeWeight: 2,
-  //     draggable: true
-  //   });
-  //   break;
+  case 'Point':
+    polygon = new google.maps.Marker({
+      position: geometry.get(),
+      draggable: true
+    });
+    polygon.addListener('dragend', function(e) {
+      var snappedPoint = getSnappedPoint(e.latLng);
+      polygon.setPosition(snappedPoint);
+      updateDataFeatureFromFeature();
+    });
+    break;
 
   }
 
@@ -411,6 +417,11 @@ function updateDataFeatureFromFeature() {
         });
         selectedDataFeature.setGeometry(new google.maps.Data.LineString(points));
         break;
+
+      case 'Point':
+        selectedDataFeature.setGeometry(new google.maps.Data.Point(polygon.getPosition()));
+        break;
+
     }
 
   }
@@ -421,7 +432,7 @@ function addPathListeners(path, pathIndex) {
       // var newLatLng = path.getAt(index);
       // console.log("set_at", index);
       if(!snappingInProgess) {
-        snapPoint(this, index);
+        snapPointOnPath(this, index);
       }
 
     });
@@ -429,7 +440,7 @@ function addPathListeners(path, pathIndex) {
     google.maps.event.addListener(path, 'insert_at', function(index) {
       // console.log("insert_at", index);
       if(!snappingInProgess) {
-        snapPoint(this, index);
+        snapPointOnPath(this, index);
       }
 
     });
