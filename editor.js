@@ -13,7 +13,8 @@ var polygon = null;
 var snappingInProgess = false;
 
 var settings = {};
-settings.snapDistance = 25;
+settings.snappingEnabled = true;
+settings.snappingDistance = 25;
 settings.zoomRatios = {
   20: 1128.497220,
   19: 2256.994440,
@@ -52,35 +53,72 @@ function CustomControl(controlDiv, settings) {
   controlDiv.appendChild(controlUI);
 
   // Set CSS for the control interior.
-  var snapDistanceInput = document.createElement('input');
-  snapDistanceInput.setAttribute('id', 'snap-distance');
-  snapDistanceInput.setAttribute('type', 'number');
-  snapDistanceInput.setAttribute('min', 0);
-  snapDistanceInput.setAttribute('max', 100);
-  snapDistanceInput.setAttribute('value', settings.snapDistance);
-  snapDistanceInput.style.color = 'rgb(25,25,25)';
-  snapDistanceInput.style.fontFamily = 'Roboto,Arial,sans-serif';
-  snapDistanceInput.style.fontSize = '12px';
-  snapDistanceInput.style.lineHeight = '12px';
-  snapDistanceInput.style.paddingLeft = '5px';
-  snapDistanceInput.style.paddingRight = '5px';
-  controlUI.appendChild(snapDistanceInput);
+  var snappingEnabledInput = document.createElement('input');
+  snappingEnabledInput.setAttribute('id', 'snapping-enabled');
+  snappingEnabledInput.setAttribute('type', 'checkbox');
+  snappingEnabledInput.setAttribute('value', 'enabled');
+  if(settings.snappingEnabled) snappingEnabledInput.setAttribute('checked', 'checked');
+  snappingEnabledInput.style.color = 'rgb(25,25,25)';
+  snappingEnabledInput.style.fontFamily = 'Roboto,Arial,sans-serif';
+  snappingEnabledInput.style.fontSize = '12px';
+  snappingEnabledInput.style.lineHeight = '12px';
+  snappingEnabledInput.style.paddingLeft = '5px';
+  snappingEnabledInput.style.paddingRight = '5px';
+  snappingEnabledInput.style.float = 'left';
+  controlUI.appendChild(snappingEnabledInput);
 
-  var label = document.createElement('label');
-  label.setAttribute('for', 'snap-distance');
-  label.style.color = 'rgb(25,25,25)';
-  label.style.fontFamily = 'Roboto,Arial,sans-serif';
-  label.style.fontSize = '12px';
-  label.style.lineHeight = '20px';
-  label.style.paddingLeft = '5px';
-  label.style.paddingRight = '5px';
-  label.style.float = 'left';
-  label.innerHTML = 'Snap distance';
-  controlUI.appendChild(label);
+  var snappingEnabledLabel = document.createElement('label');
+  snappingEnabledLabel.setAttribute('for', 'snapping-enabled');
+  snappingEnabledLabel.style.color = 'rgb(25,25,25)';
+  snappingEnabledLabel.style.fontFamily = 'Roboto,Arial,sans-serif';
+  snappingEnabledLabel.style.fontSize = '12px';
+  snappingEnabledLabel.style.lineHeight = '20px';
+  snappingEnabledLabel.style.paddingLeft = '5px';
+  snappingEnabledLabel.style.paddingRight = '5px';
+  snappingEnabledLabel.style.float = 'left';
+  snappingEnabledLabel.innerHTML = 'snap to points, distance:';
+  controlUI.appendChild(snappingEnabledLabel);
 
-  snapDistanceInput.addEventListener('change', function(e) {
+  var snappingDistanceInput = document.createElement('input');
+  snappingDistanceInput.setAttribute('id', 'snapping-distance');
+  snappingDistanceInput.setAttribute('type', 'number');
+  snappingDistanceInput.setAttribute('min', 0);
+  snappingDistanceInput.setAttribute('max', 100);
+  snappingDistanceInput.setAttribute('value', settings.snappingDistance);
+  snappingDistanceInput.style.color = 'rgb(25,25,25)';
+  snappingDistanceInput.style.fontFamily = 'Roboto,Arial,sans-serif';
+  snappingDistanceInput.style.fontSize = '12px';
+  snappingDistanceInput.style.lineHeight = '12px';
+  snappingDistanceInput.style.paddingLeft = '5px';
+  snappingDistanceInput.style.paddingRight = '5px';
+  snappingDistanceInput.style.textAlign = 'right';
+  controlUI.appendChild(snappingDistanceInput);
+
+  var snappingDistanceLabel = document.createElement('label');
+  snappingDistanceLabel.setAttribute('for', 'snapping-distance');
+  snappingDistanceLabel.style.color = 'rgb(25,25,25)';
+  snappingDistanceLabel.style.fontFamily = 'Roboto,Arial,sans-serif';
+  snappingDistanceLabel.style.fontSize = '12px';
+  snappingDistanceLabel.style.lineHeight = '20px';
+  snappingDistanceLabel.style.paddingLeft = '5px';
+  snappingDistanceLabel.style.paddingRight = '5px';
+  snappingDistanceLabel.style.float = 'right';
+  snappingDistanceLabel.innerHTML = 'px';
+  controlUI.appendChild(snappingDistanceLabel);
+
+  snappingEnabledInput.addEventListener('change', function(e) {
+    settings.snappingEnabled = e.target.checked;
+    deselectLastFeature();
+  });
+
+  snappingDistanceInput.addEventListener('focus', function(e) {
+    deselectLastFeature();
+  });
+
+  snappingDistanceInput.addEventListener('change', function(e) {
     // console.log(e.target.value);
-    settings.snapDistance = e.target.value;
+    settings.snappingDistance = e.target.value;
+    deselectLastFeature();
   });
 
 }
@@ -209,7 +247,7 @@ function refreshDataFromGeoJson() {
 // }
 
 function snapPointOnPath(path, index) {
-  if(settings.snapDistance === 0) {
+  if(settings.snappingDistance === 0) {
     return false;
   }
 
@@ -217,7 +255,7 @@ function snapPointOnPath(path, index) {
 
   var latLng = path.getAt(index);
 
-  var snappedPoint = getSnappedPoint(latLng);
+  var snappedPoint = settings.snappingEnabled ? getSnappedPoint(latLng) : latLng;
 
   path.setAt(index, snappedPoint);
 
@@ -233,7 +271,7 @@ function getSnappedPoint(latLng) {
   var maxDistance = 0;
   var zoom = map.getZoom();
   if(settings.zoomRatios[zoom] !== undefined) {
-    maxDistance = settings.zoomRatios[zoom] / 1000000000 * settings.snapDistance;
+    maxDistance = settings.zoomRatios[zoom] / 1000000000 * settings.snappingDistance;
   }
   var maxDistanceSquared = maxDistance * maxDistance;
 
@@ -313,6 +351,7 @@ function deselectLastFeature() {
   if(polygon !== null) {
     polygon.setMap(null);
     polygon = null;
+    selectedDataFeature = null;
   }
 }
 
@@ -367,8 +406,10 @@ function convertDataFeatureToFeature() {
         draggable: true
       });
       polygon.addListener('dragend', function(e) {
-        var snappedPoint = getSnappedPoint(e.latLng);
-        polygon.setPosition(snappedPoint);
+      	if(settings.snappingEnabled) {
+       	  var snappedPoint = getSnappedPoint(e.latLng);
+    	  polygon.setPosition(snappedPoint);
+    	}
         updateDataFeatureFromFeature();
       });
       break;
