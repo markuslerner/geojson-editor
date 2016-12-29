@@ -215,7 +215,6 @@ function snapPointOnPath(path, index) {
   snappingInProgess = true;
 
   var latLng = path.getAt(index);
-  // console.log(latLng.toString());
 
   var snappedPoint = getSnappedPoint(latLng);
 
@@ -235,6 +234,7 @@ function getSnappedPoint(latLng) {
   if(settings.zoomRatios[zoom] !== undefined) {
     maxDistance = settings.zoomRatios[zoom] / 1000000000 * settings.snapDistance;
   }
+  var maxDistanceSquared = maxDistance * maxDistance;
 
   // snap point at index to all points of all other features:
   var snappedPoint = latLng;
@@ -244,10 +244,10 @@ function getSnappedPoint(latLng) {
       var geometry = feature.getGeometry();
       
       geometry.forEachLatLng(function(latLng2) {
-        var distance = getDistance(latLng, latLng2);
-        if(distance < maxDistance) {
+        var distanceSquared = getDistanceSquared(latLng, latLng2);
+        if(distanceSquared < maxDistanceSquared) {
           snappedPoint = latLng2;
-          maxDistance = distance;
+          maxDistanceSquared = distanceSquared;
         }
       });
     }
@@ -279,6 +279,12 @@ function getDistance(latLng1, latLng2) {
   var dLat = latLng1.lat() - latLng2.lat();
   var dLng = latLng1.lng() - latLng2.lng();
   return Math.sqrt(dLat * dLat + dLng * dLng);
+}
+
+function getDistanceSquared(latLng1, latLng2) {
+  var dLat = latLng1.lat() - latLng2.lat();
+  var dLng = latLng1.lng() - latLng2.lng();
+  return dLat * dLat + dLng * dLng;
 }
 
 function handleMapClick(e) {
@@ -384,12 +390,9 @@ function convertDataFeatureToFeature() {
 	  // });
 
 	  google.maps.event.addListener(polygon, 'rightclick', function(e) {
-	    console.log(e);
-
 	    if(e.path !== undefined && e.vertex !== undefined) {
 	      polygon.getPaths().getAt(e.path).removeAt(e.vertex);
 	    }
-
 	  });
 	}
 
