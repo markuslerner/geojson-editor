@@ -13,3 +13,4 @@ Snaps the dragged point to the points of all the other features.
 * Click feature to edit points
 * Right-click point to delete point
 * Set snapping distance in pixels
+* Delete feature by pressing 'backspace' or 'delete'

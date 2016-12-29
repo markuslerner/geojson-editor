@@ -98,6 +98,7 @@ function init() {
     draggable: false
   });
   map.addListener('click', handleMapClick);
+  document.addEventListener('keydown', handleKeyDown);
 
   var customControlDiv = document.createElement('div');
   customControlDiv.style.marginTop = '5px';
@@ -289,6 +290,15 @@ function getDistanceSquared(latLng1, latLng2) {
 
 function handleMapClick(e) {
   deselectLastFeature();
+}
+
+function handleKeyDown(e) {
+  if(e.key === 'Backspace' || e.key === 'Delete') {
+    if(selectedDataFeature !== null) {
+      map.data.remove(selectedDataFeature);
+      deselectLastFeature();
+    }
+  }
 }
 
 function selectFeature(e) {
