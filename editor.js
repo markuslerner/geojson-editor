@@ -134,13 +134,13 @@ function init() {
   google.maps.event.addDomListener(dropContainer, 'dragleave', hidePanel);
   // Set up events for changing the geoJson input.
   google.maps.event.addDomListener(
-      geoJsonInput,
-      'input',
-      refreshDataFromGeoJson);
+    geoJsonInput,
+    'input',
+    refreshDataFromGeoJson);
   google.maps.event.addDomListener(
-      geoJsonInput,
-      'input',
-      refreshDownloadLinkFromGeoJson);
+    geoJsonInput,
+    'input',
+    refreshDownloadLinkFromGeoJson);
 
   // Set up events for styling.
   google.maps.event.addDomListener(window, 'resize', resizeGeoJsonInput);
@@ -323,45 +323,45 @@ function convertDataFeatureToFeature() {
         paths.push(points);
       });
 
-  	  polygon = new google.maps.Polygon({
-	    paths: paths,
-	    strokeColor: '#FF0000',
-	    strokeOpacity: 0.8,
-	    strokeWeight: 2,
-	    editable: true,
-	    fillColor: '#FF0000',
-	    fillOpacity: 0.35
-	  });
-	  polygon.getPaths().forEach(addPathListeners);
-	  break;
+      polygon = new google.maps.Polygon({
+        paths: paths,
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        editable: true,
+        fillColor: '#FF0000',
+        fillOpacity: 0.35
+      });
+      polygon.getPaths().forEach(addPathListeners);
+      break;
 
-	case 'LineString':
+    case 'LineString':
       var points = [];
       geometry.forEachLatLng(function(latLng) {
         points.push(latLng);
       });
 
-  	  polygon = new google.maps.Polyline({
-	    path: points,
-	    strokeColor: '#FF0000',
-	    strokeOpacity: 0.8,
-	    strokeWeight: 2,
-	    editable: true
-	  });
-	  addPathListeners(polygon.getPath(), 0);
-	  break;
+      polygon = new google.maps.Polyline({
+        path: points,
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        editable: true
+      });
+      addPathListeners(polygon.getPath(), 0);
+      break;
 
-  case 'Point':
-    polygon = new google.maps.Marker({
-      position: geometry.get(),
-      draggable: true
-    });
-    polygon.addListener('dragend', function(e) {
-      var snappedPoint = getSnappedPoint(e.latLng);
-      polygon.setPosition(snappedPoint);
-      updateDataFeatureFromFeature();
-    });
-    break;
+    case 'Point':
+      polygon = new google.maps.Marker({
+        position: geometry.get(),
+        draggable: true
+      });
+      polygon.addListener('dragend', function(e) {
+        var snappedPoint = getSnappedPoint(e.latLng);
+        polygon.setPosition(snappedPoint);
+        updateDataFeatureFromFeature();
+      });
+      break;
 
   }
 
@@ -369,7 +369,7 @@ function convertDataFeatureToFeature() {
   	return;
   } else {
 
-	  polygon.setMap(map);
+   polygon.setMap(map);
 
 	  // google.maps.event.addListener(polygon, 'mousedown', function(e) {
 	  //     console.log("mousedown", e.latLng.toString(), e);
@@ -390,10 +390,10 @@ function convertDataFeatureToFeature() {
 	  // });
 
 	  google.maps.event.addListener(polygon, 'rightclick', function(e) {
-	    if(e.path !== undefined && e.vertex !== undefined) {
-	      polygon.getPaths().getAt(e.path).removeAt(e.vertex);
-	    }
-	  });
+     if(e.path !== undefined && e.vertex !== undefined) {
+       polygon.getPaths().getAt(e.path).removeAt(e.vertex);
+     }
+   });
 	}
 
 }
@@ -432,25 +432,25 @@ function updateDataFeatureFromFeature() {
 
 function addPathListeners(path, pathIndex) {
 	google.maps.event.addListener(path, 'set_at', function(index, oldLatLng) {
-      // var newLatLng = path.getAt(index);
-      // console.log("set_at", index);
-      if(!snappingInProgess) {
-        snapPointOnPath(this, index);
-      }
+    // var newLatLng = path.getAt(index);
+    // console.log("set_at", index);
+    if(!snappingInProgess) {
+      snapPointOnPath(this, index);
+    }
 
-    });
+  });
 
-    google.maps.event.addListener(path, 'insert_at', function(index) {
-      // console.log("insert_at", index);
-      if(!snappingInProgess) {
-        snapPointOnPath(this, index);
-      }
+  google.maps.event.addListener(path, 'insert_at', function(index) {
+    // console.log("insert_at", index);
+    if(!snappingInProgess) {
+      snapPointOnPath(this, index);
+    }
 
-    });
+  });
 
-    google.maps.event.addListener(path, 'remove_at', function(index) {
-      updateDataFeatureFromFeature();
-    });
+  google.maps.event.addListener(path, 'remove_at', function(index) {
+    updateDataFeatureFromFeature();
+  });
 }
 
 // Display the validity of geoJson.
@@ -475,18 +475,6 @@ function hidePanel() {
   dropContainer.className = '';
 }
 
-function processPoints(geometry, callback, thisArg) {
-  if (geometry instanceof google.maps.LatLng) {
-    callback.call(thisArg, geometry);
-  } else if (geometry instanceof google.maps.Data.Point) {
-    callback.call(thisArg, geometry.get());
-  } else {
-    geometry.getArray().forEach(function(g) {
-      processPoints(g, callback, thisArg);
-    });
-  }
-}
-
 function handleDrop(e) {
   deselectLastFeature();
 
@@ -495,10 +483,10 @@ function handleDrop(e) {
   hidePanel();
 
   var files = e.dataTransfer.files;
-  if (files.length) {
+  if(files.length) {
     // process file(s) being dropped
     // grab the file data from each file
-    for (var i = 0, file; file = files[i]; i++) {
+    for(var i = 0, file; file = files[i]; i++) {
       var reader = new FileReader();
       reader.onload = function(e) {
         map.data.addGeoJson(JSON.parse(e.target.result));
