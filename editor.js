@@ -223,7 +223,7 @@ function refreshDataFromGeoJson() {
   setGeoJsonValidity(true);
 
   setTimeout(fitMapToAllFeatures, 17);
-  
+
 }
 
 // function handleMouseMove(path, index) {
@@ -281,7 +281,7 @@ function getSnappedPoint(latLng) {
   map.data.forEach(function(feature) {
     if(feature !== selectedDataFeature) {
       var geometry = feature.getGeometry();
-      
+
       geometry.forEachLatLng(function(latLng2) {
         var distanceSquared = getDistanceSquared(latLng, latLng2);
         if(distanceSquared < maxDistanceSquared) {
@@ -357,7 +357,7 @@ function deselectLastFeature() {
 
 function convertDataFeatureToFeature() {
   var geometry = selectedDataFeature.getGeometry();
-  
+
   polygon = null;
 
   switch(geometry.getType()) {
@@ -526,8 +526,16 @@ function hidePanel() {
   dropContainer.className = '';
 }
 
+function deleteAllFeatures() {
+  map.data.forEach(function(feature) {
+    // If you want, check here for some constraints.
+    map.data.remove(feature);
+  });
+}
+
 function handleDrop(e) {
   deselectLastFeature();
+  deleteAllFeatures();
 
   e.preventDefault();
   e.stopPropagation();
@@ -567,7 +575,7 @@ function fitMapToAllFeatures() {
 
   map.data.forEach(function(feature) {
     var geometry = feature.getGeometry();
-    
+
     geometry.forEachLatLng(function(latLng) {
       bounds.extend(latLng);
     });
