@@ -159,7 +159,7 @@ function init() {
 
   // Set up the drag and drop events.
   // First on common events.
-  [mapContainer, dropContainer].forEach(function(container) {
+  [geoJsonInput, mapContainer, dropContainer].forEach(function(container) {
     google.maps.event.addDomListener(container, 'drop', handleDrop);
     google.maps.event.addDomListener(container, 'dragover', showPanel);
   });
