@@ -87,12 +87,12 @@ body {
 #panel-title {
   font-size: 20px;
   line-height: 24px;
-  color: #DD4B39;
+  color: #333;
 }
 
-.subtitle {
-  font-size: 16px;
-  color: #222222;
+#panel-subtitle {
+  color: #333;
+  margin: 10px 0 20px 0;
 }
 
 hr {
@@ -106,4 +106,3 @@ hr {
 #geojson-input.invalid {
   background-color: #FAC6C0;
 }
-
