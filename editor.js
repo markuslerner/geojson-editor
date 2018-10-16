@@ -6,6 +6,7 @@ var dropContainer;
 var panel;
 var geoJsonInput;
 var downloadLink;
+var searchInput, autocomplete, infowindow, infowindowContent, marker;
 
 var selectedDataFeature = null;
 var polygon = null;
@@ -123,11 +124,82 @@ function CustomControl(controlDiv, settings) {
 
 }
 
+function createAutoComplete() {
+  searchInput = document.getElementById('pac-input');
+  autocomplete = new google.maps.places.Autocomplete(searchInput);
+
+  // Bind the map's bounds (viewport) property to the autocomplete object,
+  // so that the autocomplete requests use the current map bounds for the
+  // bounds option in the request.
+  autocomplete.bindTo('bounds', map);
+
+  // Set the data fields to return when the user selects a place.
+  autocomplete.setFields(['address_components', 'geometry', 'icon', 'name']);
+
+  infowindow = new google.maps.InfoWindow();
+  infowindowContent = document.getElementById('infowindow-content');
+  infowindow.setContent(infowindowContent);
+
+  if(marker === undefined) {
+    marker = new google.maps.Marker({
+      map,
+    });
+  }
+
+  var mapSearchfieldClear = document.getElementById('map-searchfield-clear');
+  mapSearchfieldClear.addEventListener('click', function() {
+    searchInput.value = '';
+    marker.setVisible(false);
+    infowindow.close();
+  });
+
+  autocomplete.addListener('place_changed', function() {
+    infowindow.close();
+    marker.setVisible(false);
+
+    var place = autocomplete.getPlace();
+    if(!place.geometry) {
+      // User entered the name of a Place that was not suggested and
+      // pressed the Enter key, or the Place Details request failed.
+      // window.alert('No details available for input: \'' + place.name + '\'');
+      return;
+    }
+
+    // If the place has a geometry, then present it on a map.
+    if(place.geometry.viewport) {
+      map.fitBounds(place.geometry.viewport);
+    } else {
+      map.setCenter(place.geometry.location);
+      map.setZoom(17);
+    }
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+    // updateLocation(place.geometry.location.lat(), place.geometry.location.lng());
+
+    // var address = '';
+    // if(place.address_components) {
+    //   address = [
+    //     ((place.address_components[2] && place.address_components[2].short_name) || '')
+    //   ].join(' ');
+    // }
+
+    // infowindowContent.children['place-icon'].src = place.icon;
+    infowindowContent.children['place-name'].textContent = place.name;
+    // infowindowContent.children['place-address'].textContent = address;
+    infowindow.open(map, marker);
+
+  });
+}
+
 function init() {
   // Initialise the map.
   map = new google.maps.Map(document.getElementById('map-holder'), {
     center: {lat: 0, lng: 0},
-    zoom: 3
+    zoom: 3,
+    mapTypeControlOptions: {
+      position: google.maps.ControlPosition.TOP_RIGHT
+    },
+    streetViewControl: false
   });
   map.data.setControls(['Point', 'LineString', 'Polygon']);
   map.data.setControlPosition(google.maps.ControlPosition.TOP_RIGHT);
@@ -139,10 +211,10 @@ function init() {
   document.addEventListener('keydown', handleKeyDown);
 
   var customControlDiv = document.createElement('div');
-  customControlDiv.style.marginTop = '5px';
+  customControlDiv.style.marginTop = '10px';
   customControlDiv.style.marginRight = '10px';
   var customControl = new CustomControl(customControlDiv, settings);
-  customControlDiv.index = 0;
+  customControlDiv.index = 1;
   map.controls[google.maps.ControlPosition.TOP_RIGHT].push(customControlDiv);
 
   bindDataLayerListeners(map.data);
@@ -153,6 +225,8 @@ function init() {
   var mapContainer = document.getElementById('map-holder');
   geoJsonInput = document.getElementById('geojson-input');
   downloadLink = document.getElementById('download-link');
+
+  createAutoComplete();
 
   // Resize the geoJsonInput textarea.
   resizeGeoJsonInput();

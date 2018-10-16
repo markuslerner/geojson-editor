@@ -29,6 +29,63 @@ body {
   width: 100%;
 }
 
+#map-searchfield {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  margin: 10px;
+}
+
+#map-searchfield-icon {
+  position: absolute;
+  top: 0px;
+  left: 7px;
+  z-index: 100;
+  display: inline-block;
+  pointer-events: none;
+  width: 18px;
+}
+
+#pac-input {
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 14px;
+  border-radius: 3px;
+  width: 250px;
+  height: 26px;
+  padding: 5px 32px 5px 32px !important;
+  pointer-events: auto;
+  border: none;
+  background-color: #fff !important;
+  outline: none;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#map-searchfield-clear {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.gm-style-mtc > div {
+  font-family: $pp-font-family !important;
+  font-size: 14px !important;
+  height: 36px !important;
+
+  &[aria-pressed="true"] {
+    font-weight: bold !important;
+  }
+}
+
+.gmnoprint {
+  margin-top: 10px !important;
+}
+
 #drop-container {
   display: none;
   height: 100%;

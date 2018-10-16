@@ -6,9 +6,9 @@
     <meta charset="utf-8">
 
     <title>GeoJSON Editor</title>
-    <link href="styles.css?v=0.4" title="compact" rel="stylesheet" type="text/css">
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-    <script src="editor.js?v=0.4"></script>
+    <link href="styles.css?v=0.5" title="compact" rel="stylesheet" type="text/css">
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=YOUR_API_KEY&libraries=places"></script>
+    <script src="editor.js?v=0.5"></script>
   </head>
 
   <body>
@@ -27,6 +27,33 @@
 
     <div id="map-container">
       <div id="map-holder"></div>
+
+
+      <div id="map-searchfield">
+        <svg id="map-searchfield-icon" xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 37 37">
+          <g fill="none" stroke="#898989" transform="translate(2 2)">
+            <path stroke-linecap="square" stroke-width="4" d="M22.3571429,22.3571429 L31.6702892,31.6702892"/>
+            <circle cx="12.5" cy="12.5" r="12.5" stroke-width="3"/>
+          </g>
+        </svg>
+
+        <input
+          type="text"
+          id="pac-input"
+          placeholder="Address, place"
+        />
+
+        <svg id="map-searchfield-clear" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 38 38">
+          <g fill="none" stroke="#666" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" transform="rotate(180 18 18)">
+            <path d="M0,34 L34,0"/>
+            <path d="M0,34 L34,0" transform="matrix(-1 0 0 1 34 0)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div id="infowindow-content">
+        <span id="place-name" className="title"></span>
+      </div>
 
       <div id="drop-container">
         <div id="drop-silhouette"></div>
