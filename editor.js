@@ -331,7 +331,11 @@ function snapPointOnPath(path, index) {
 
   var snappedPoint = settings.snappingEnabled ? getSnappedPoint(latLng) : latLng;
 
-  path.setAt(index, snappedPoint);
+  try {
+    path.setAt(index, snappedPoint);
+  } catch(e) {
+    console.error('Error setting point: ' + e);
+  }
 
   updateDataFeatureFromFeature();
 
@@ -520,7 +524,11 @@ function convertDataFeatureToFeature() {
 
 	  google.maps.event.addListener(polygon, 'rightclick', function(e) {
      if(e.path !== undefined && e.vertex !== undefined) {
-       polygon.getPaths().getAt(e.path).removeAt(e.vertex);
+       var path = polygon.getPaths().getAt(e.path);
+
+       if(path.getArray().length > 3) {
+        path.removeAt(e.vertex);
+       }
      }
    });
 	}
@@ -562,7 +570,7 @@ function updateDataFeatureFromFeature() {
 function addPathListeners(path, pathIndex) {
 	google.maps.event.addListener(path, 'set_at', function(index, oldLatLng) {
     // var newLatLng = path.getAt(index);
-    // console.log("set_at", index);
+    // console.log("set_at", index, snappingInProgess);
     if(!snappingInProgess) {
       snapPointOnPath(this, index);
     }
@@ -580,6 +588,7 @@ function addPathListeners(path, pathIndex) {
   google.maps.event.addListener(path, 'remove_at', function(index) {
     updateDataFeatureFromFeature();
   });
+
 }
 
 // Display the validity of geoJson.
