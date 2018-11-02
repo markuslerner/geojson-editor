@@ -371,7 +371,11 @@ function getSnappedPoint(latLng) {
 
 // Refresh download link.
 function refreshDownloadLinkFromGeoJson() {
-  downloadLink.href = "data:;base64," + btoa(geoJsonInput.value);
+  let value = geoJsonInput.value;
+  // value = value.replace(/[^\x20-\x7E]+/g, ""); // replace non-ascii characters
+  // value = Base64.encode(value);
+  value = unescape(encodeURIComponent(value));
+  downloadLink.href = "data:;base64," + btoa(value);
 }
 
 // Apply listeners to refresh the GeoJson display on a given data layer.
