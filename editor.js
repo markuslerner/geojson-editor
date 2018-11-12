@@ -676,5 +676,5 @@ function fitMapToAllFeatures() {
 function resizeGeoJsonInput() {
   var geoJsonInputRect = geoJsonInput.getBoundingClientRect();
   var panelRect = panel.getBoundingClientRect();
-  geoJsonInput.style.height = panelRect.bottom - geoJsonInputRect.top - 8 + "px";
+  geoJsonInput.style.height = panelRect.bottom - geoJsonInputRect.top - 50 + "px";
 }

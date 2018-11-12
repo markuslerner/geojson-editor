@@ -123,12 +123,13 @@ body {
   z-index: 100;
 }
 
-#panel-content {
-  padding: 8.5px;
+ul {
+  margin: 5px 0 0 0;
+  padding: 0 20px;
 }
 
-#geojson-controls {
-  padding-bottom: 8px;
+#panel-content {
+  padding: 8.5px;
 }
 
 #geojson-input {
@@ -139,6 +140,23 @@ body {
   border: none;
   resize: none;
   background-color: #F1F1F1;
+}
+
+#geojson-input::placeholder {
+  font-size: 14px;
+}
+
+#geojson-controls {
+  padding-bottom: 8px;
+}
+
+#download-link button {
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid #bbb;
+  margin-top: 5px;
+  background-color: #fff;
 }
 
 #panel-title {

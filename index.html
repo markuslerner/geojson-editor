@@ -6,22 +6,38 @@
     <meta charset="utf-8">
 
     <title>GeoJSON Editor</title>
-    <link href="styles.css?v=0.7" title="compact" rel="stylesheet" type="text/css">
+    <link href="styles.css?v=0.9" title="compact" rel="stylesheet" type="text/css">
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=YOUR_API_KEY&libraries=places"></script>
-    <script src="editor.js?v=0.7"></script>
+    <script src="editor.js?v=0.9"></script>
   </head>
 
   <body>
     <div id="panel">
       <div id="panel-content">
         <div id="panel-title">GeoJSON Editor</div>
-        <div id="panel-subtitle">Simple GeoJSON editor with adjustable point snapping. <a href="https://github.com/markuslerner/geojson-editor" target="_blank">Source code</a>.</div>
-        <div id="geojson-controls">
-          <a id="download-link" href="data:;base64," download="map.geojson"><button>Download</button></a>
+        <div id="panel-subtitle">
+          Simple GeoJSON editor with adjustable point snapping.
+          <br/>
+          <br/>
+          When snapping is enabled, the dragged point will snap to the points of all the other features.
+          <br/>
+          <br/>
+          <b>Usage:</b>
+          <ul>
+          <li>Click feature to edit points</li>
+          <li>Right-click point to delete it</li>
+          <li>Set snapping distance in pixels</li>
+          <li>Delete feature by pressing 'backspace' or 'delete'</li>
+          </ul>
+          <br/>
+          <a href="https://github.com/markuslerner/geojson-editor" target="_blank">Source code</a>, based on <a href="https://google-developers.appspot.com/maps/documentation/utils/geojson/" target="_blank">Google’s GeoJSON editor</a>.
         </div>
         <textarea
           id="geojson-input"
           placeholder="Drag and drop GeoJSON file or paste it here to begin editing."></textarea>
+        <div id="geojson-controls">
+          <a id="download-link" href="data:;base64," download="map.geojson"><button>Download GeoJSON</button></a>
+        </div>
       </div>
     </div>
 
